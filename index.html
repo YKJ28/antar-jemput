@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d3461">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Antar Jemput">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+  html, body { margin: 0; }
+  body { padding-top: env(safe-area-inset-top, 0px); }
+</style>
+<!--A-->
+<title>Booking Antar Jemput Bandara</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: HP = satu layar per tampilan (Form / Email) dengan bar aksi di bawah; desktop = form kiri, pratinjau email kanan. */
+:root {
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --ink: #14213a;
+  --muted: #5b667a;
+  --line: #d6dce6;
+  --field: #f7f9fc;
+  --accent: #f2b200;      /* kuning papan petunjuk bandara */
+  --accent-ink: #1a1400;
+  --navy: #1d3461;
+  --bar: #ffffffee;
+  --warn-bg: #fff4d6;
+  --warn-ink: #7a5600;
+  --ok: #1f7a4d;
+  --wa: #128c4b;
+  --font-ui: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1424; --surface: #151f33; --ink: #e6ebf4; --muted: #9aa6bb; --line: #2a3750;
+    --field: #0f182b; --accent: #f5c02e; --accent-ink: #1a1400; --navy: #9db8ef; --bar: #151f33ee;
+    --warn-bg: #3a2f0f; --warn-ink: #f5d27a; --ok: #5fd39a; --wa: #3fc57f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1424; --surface: #151f33; --ink: #e6ebf4; --muted: #9aa6bb; --line: #2a3750;
+  --field: #0f182b; --accent: #f5c02e; --accent-ink: #1a1400; --navy: #9db8ef; --bar: #151f33ee;
+  --warn-bg: #3a2f0f; --warn-ink: #f5d27a; --ok: #5fd39a; --wa: #3fc57f; color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px calc(96px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 900px) { .wrap { padding-block: 24px 48px; gap: 20px; } }
+
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sign {
+  background: var(--accent); color: var(--accent-ink); font-family: var(--font-code); font-weight: 700;
+  font-size: 12px; letter-spacing: .08em; padding: 6px 9px; border-radius: 4px; flex: none;
+}
+@media (max-width: 560px) { .sign { display: none; } }
+h1 { font-size: 22px; line-height: 1.15; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+@media (min-width: 900px) { h1 { font-size: 26px; } }
+.sub { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 900px) { .grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); } }
+
+form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+}
+.panel-head h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--navy); }
+.code { font-family: var(--font-code); font-size: 11px; color: var(--muted); letter-spacing: .02em; }
+.panel-body { padding: 16px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.panel.off .panel-body { display: none; }
+.f { display: flex; flex-direction: column; gap: 5px; min-width: 0; grid-column: span 6; }
+.s2 { grid-column: span 2; } .s3 { grid-column: span 3; }
+@media (max-width: 560px) { .s2, .s3 { grid-column: span 6; } .half { grid-column: span 3; } }
+label { font-size: 13px; font-weight: 600; color: var(--ink); }
+label .req { color: var(--warn-ink); font-weight: 700; margin-left: 2px; }
+label .opt { color: var(--muted); font-weight: 400; }
+input, select, textarea {
+  font: inherit; font-size: 16px; color: var(--ink); background: var(--field); border: 1px solid var(--line);
+  border-radius: 8px; padding: 11px 12px; width: 100%; min-width: 0; min-height: 46px;
+}
+textarea { resize: vertical; min-height: 72px; }
+input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; }
+input.mono { font-family: var(--font-code); text-transform: uppercase; letter-spacing: .03em; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent);
+}
+
+.switch { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; min-height: 36px; }
+.switch input { width: 20px; height: 20px; min-height: 0; accent-color: var(--navy); padding: 0; }
+
+button, .btn {
+  font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 8px;
+  padding: 10px 14px; min-height: 44px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+button:hover, .btn:hover { border-color: var(--navy); }
+.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.primary:hover { filter: brightness(.96); border-color: var(--accent); }
+.wa { background: var(--wa); color: #fff; border-color: var(--wa); }
+.wa:hover { border-color: var(--wa); filter: brightness(1.05); }
+.ghost { background: transparent; font-size: 13px; padding: 6px 10px; min-height: 36px; }
+.badge {
+  font-family: var(--font-code); font-size: 12px; background: var(--warn-bg); color: var(--warn-ink);
+  border-radius: 999px; padding: 1px 8px; font-weight: 700;
+}
+.badge[hidden] { display: none; }
+
+aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (min-width: 900px) { aside { position: sticky; top: 16px; } }
+.mail { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; min-width: 0; }
+.mail-row { padding: 10px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+.mail-row .k { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); flex: 0 0 56px; }
+.mail-row .v { min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+pre#body {
+  margin: 0; padding: 16px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-ui);
+  font-size: 15px; line-height: 1.6; min-width: 0;
+}
+@media (min-width: 900px) { pre#body { max-height: 62vh; overflow-y: auto; font-size: 14px; } }
+mark { background: var(--warn-bg); color: var(--warn-ink); border-radius: 3px; padding: 0 3px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.status { font-size: 13px; color: var(--muted); min-height: 1.4em; }
+.status.ok { color: var(--ok); font-weight: 600; }
+.missing { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; }
+.sample { font-size: 12px; font-weight: 600; color: var(--warn-ink); background: var(--warn-bg); padding: 3px 8px; border-radius: 999px; }
+.backlink { display: none; }
+
+/* Bar aksi bawah, hanya di HP */
+.bottombar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--bar); border-top: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; gap: 8px;
+}
+.bottombar > * { flex: 1 1 0; min-width: 0; }
+.bottombar .narrow { flex: 0 0 auto; }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 30;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600;
+  padding: 8px 14px; border-radius: 999px; max-width: calc(100% - 32px); text-align: center;
+}
+@media (max-width: 899px) {
+  body[data-view="form"] aside { display: none; }
+  body[data-view="mail"] form { display: none; }
+  body[data-view="mail"] header .toolbar { display: none; }
+  body[data-view="mail"] .backlink { display: inline-flex; }
+  .mail .actions { display: none; }
+  .status { display: none; }
+  body[data-view="form"] .bar-mail { display: none; }
+  body[data-view="mail"] .bar-form { display: none; }
+}
+@media (min-width: 900px) { .bottombar, .toast { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<!--/A-->
+</head>
+<body data-view="form">
+<!--B-->
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="sign">✈ TRANSFER</span>
+      <div>
+        <h1>Booking Antar Jemput Bandara</h1>
+        <p class="sub">Isi data klien, email untuk agent tersusun otomatis.</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <span class="sample" id="sampleTag">Berisi data contoh</span>
+      <button type="button" class="ghost" id="btnSample">Isi contoh</button>
+      <button type="button" class="ghost" id="btnClear">Kosongkan form</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <form id="f" autocomplete="off" novalidate>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Agent &amp; pengirim</h2></div>
+        <div class="panel-body">
+          <div class="f s3"><label for="agentName">Nama agent / perusahaan <span class="opt">(sapaan)</span></label><input id="agentName" placeholder="Bpk. Andi / Bali Transport" autocapitalize="words"></div>
+          <div class="f s3"><label for="agentEmail">Email agent <span class="opt">(opsional)</span></label><input id="agentEmail" type="email" inputmode="email" placeholder="booking@agent.com" autocapitalize="off"></div>
+          <div class="f s3"><label for="agentWa">No WhatsApp agent <span class="opt">(opsional)</span></label><input id="agentWa" type="tel" inputmode="tel" placeholder="0812 ..."></div>
+          <div class="f s3"><label for="sender">Nama pengirim / tanda tangan</label><input id="sender" placeholder="Rina – Reservasi" autocapitalize="words"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Penumpang yang dijemput</h2></div>
+        <div class="panel-body">
+          <div class="f"><label for="name">Nama yang dijemput<span class="req">*</span></label><input id="name" autocapitalize="words"></div>
+          <div class="f s3"><label for="email">Email</label><input id="email" type="email" inputmode="email" autocapitalize="off"></div>
+          <div class="f s3"><label for="phone">No HP<span class="req">*</span></label><input id="phone" type="tel" inputmode="tel" placeholder="+62 812 ..."></div>
+        </div>
+      </section>
+
+      <section class="panel" id="pDep">
+        <div class="panel-head">
+          <h2>Kota keberangkatan <span class="code">· jemput ke bandara</span></h2>
+          <label class="switch"><input type="checkbox" id="useDep" checked> Perlu penjemputan</label>
+        </div>
+        <div class="panel-body">
+          <div class="f"><label for="depCity">Kota keberangkatan<span class="req">*</span></label><input id="depCity" placeholder="Jakarta" autocapitalize="words"></div>
+          <div class="f s2"><label for="depDate">Tanggal jemput<span class="req">*</span></label><input id="depDate" type="date"></div>
+          <div class="f s2 half"><label for="depPickTime">Jam jemput<span class="req">*</span></label><input id="depPickTime" type="time"></div>
+          <div class="f s2 half"><label for="depFlightTime">Jam flight<span class="req">*</span></label><input id="depFlightTime" type="time"></div>
+          <div class="f"><label for="depAddr">Alamat penjemputan<span class="req">*</span></label><textarea id="depAddr" rows="2" placeholder="Alamat rumah / hotel klien"></textarea></div>
+          <div class="f s3"><label for="depAirline">Maskapai</label><input id="depAirline" placeholder="Garuda Indonesia" autocapitalize="words"></div>
+          <div class="f s3"><label for="depFlight">Flight number<span class="req">*</span></label><input id="depFlight" class="mono" placeholder="GA 404" autocapitalize="characters"></div>
+          <div class="f s2 half"><label for="depPax">Jumlah penumpang</label><input id="depPax" type="number" min="1" inputmode="numeric"></div>
+          <div class="f s2 half"><label for="depBag">Jumlah bagasi</label><input id="depBag" type="number" min="0" inputmode="numeric"></div>
+          <div class="f s2"><label for="depTz">Zona waktu</label><select id="depTz"><option>WIB</option><option>WITA</option><option>WIT</option><option value="">—</option></select></div>
+        </div>
+      </section>
+
+      <section class="panel" id="pArr">
+        <div class="panel-head">
+          <h2>Kota tujuan <span class="code">· jemput dari bandara</span></h2>
+          <label class="switch"><input type="checkbox" id="useArr" checked> Perlu penjemputan</label>
+        </div>
+        <div class="panel-body">
+          <div class="f"><button type="button" class="ghost" id="btnCopy">Salin maskapai, flight &amp; jumlah dari keberangkatan</button></div>
+          <div class="f s3"><label for="arrCity">Kota tujuan<span class="req">*</span></label><input id="arrCity" placeholder="Denpasar" autocapitalize="words"></div>
+          <div class="f s3"><label for="arrDate">Tanggal kedatangan<span class="req">*</span></label><input id="arrDate" type="date"></div>
+          <div class="f s3 half"><label for="arrTime">Jam kedatangan<span class="req">*</span></label><input id="arrTime" type="time"></div>
+          <div class="f s3 half"><label for="arrTz">Zona waktu</label><select id="arrTz"><option>WIB</option><option>WITA</option><option>WIT</option><option value="">—</option></select></div>
+          <div class="f"><label for="arrPickup">Alamat penjemputan<span class="req">*</span></label><input id="arrPickup" placeholder="Bandara I Gusti Ngurah Rai, Terminal Domestik"></div>
+          <div class="f"><label for="arrDest">Alamat tujuan<span class="req">*</span></label><textarea id="arrDest" rows="2" placeholder="Hotel / alamat tujuan"></textarea></div>
+          <div class="f s3"><label for="arrAirline">Maskapai</label><input id="arrAirline" autocapitalize="words"></div>
+          <div class="f s3"><label for="arrFlight">Flight number<span class="req">*</span></label><input id="arrFlight" class="mono" autocapitalize="characters"></div>
+          <div class="f s3 half"><label for="arrPax">Jumlah penumpang</label><input id="arrPax" type="number" min="1" inputmode="numeric"></div>
+          <div class="f s3 half"><label for="arrBag">Jumlah bagasi</label><input id="arrBag" type="number" min="0" inputmode="numeric"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Catatan untuk agent <span class="code">· opsional</span></h2></div>
+        <div class="panel-body">
+          <div class="f"><label for="notes">Catatan</label><textarea id="notes" rows="2" placeholder="Mis. mohon bawa papan nama, klien membawa stroller"></textarea></div>
+        </div>
+      </section>
+    </form>
+
+    <aside>
+      <button type="button" class="ghost backlink" id="btnBackTop">← Kembali ke form</button>
+      <div class="missing" id="missing" hidden></div>
+      <div class="mail" aria-live="polite">
+        <div class="mail-row"><span class="k">Kepada</span><span class="v" id="outTo">—</span></div>
+        <div class="mail-row"><span class="k">Subjek</span><span class="v" id="outSubj"></span></div>
+        <pre id="body"></pre>
+        <div class="actions">
+          <button type="button" class="primary" id="btnCopyAll">Salin email</button>
+          <button type="button" id="btnCopySubj">Salin subjek</button>
+          <a class="btn" id="btnMail" href="#" target="_blank" rel="noopener">Buka di aplikasi email</a>
+          <a class="btn wa" id="btnWa" href="#" target="_blank" rel="noopener">Kirim via WhatsApp</a>
+        </div>
+      </div>
+      <div class="status" id="status">Bagian yang <mark>disorot</mark> belum diisi.</div>
+    </aside>
+  </div>
+</div>
+
+<nav class="bottombar" aria-label="Aksi">
+  <button type="button" class="primary bar-form" id="barView">Lihat email <span class="badge" id="barBadge" hidden></span></button>
+  <button type="button" class="bar-mail narrow" id="barBack" aria-label="Kembali ke form">←</button>
+  <button type="button" class="primary bar-mail" id="barCopy">Salin</button>
+  <button type="button" class="bar-mail" id="barShare">Bagikan</button>
+  <a class="btn wa bar-mail" id="barWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const ids = ["agentName","agentEmail","agentWa","sender","name","email","phone",
+    "depCity","depDate","depPickTime","depFlightTime","depAddr","depAirline","depFlight","depPax","depBag","depTz",
+    "arrCity","arrDate","arrTime","arrTz","arrPickup","arrDest","arrAirline","arrFlight","arrPax","arrBag","notes"];
+  const checks = ["useDep","useArr"];
+  const KEY = "antarJemputDraft.v1";
+  const MISS = "[belum diisi]";
+
+  const today = new Date();
+  const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const plus = n => { const d = new Date(today); d.setDate(d.getDate()+n); return iso(d); };
+  const SAMPLE = {
+    agentName: "Bapak Made", agentEmail: "", agentWa: "", sender: "Rina — Tim Reservasi",
+    name: "Ibu Sari Wulandari", email: "sari.w@contoh.com", phone: "+62 812 3456 7890",
+    depCity: "Jakarta", depDate: plus(3), depPickTime: "05:00", depFlightTime: "08:15",
+    depAddr: "Jl. Kemang Raya No. 12, Jakarta Selatan", depAirline: "Garuda Indonesia", depFlight: "GA 404",
+    depPax: "2", depBag: "3", depTz: "WIB",
+    arrCity: "Denpasar", arrDate: plus(3), arrTime: "11:05", arrTz: "WITA",
+    arrPickup: "Bandara I Gusti Ngurah Rai, Terminal Domestik", arrDest: "The Anvaya Beach Resort, Jl. Kartika Plaza, Kuta",
+    arrAirline: "Garuda Indonesia", arrFlight: "GA 404", arrPax: "2", arrBag: "3", notes: "Mohon pengemudi membawa papan nama klien.",
+    useDep: true, useArr: true
+  };
+
+  const v = id => ($(id).value || "").trim();
+  const fmtDate = s => {
+    if (!s) return "";
+    const [y,m,d] = s.split("-").map(Number);
+    return new Intl.DateTimeFormat("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).format(new Date(y, m-1, d));
+  };
+  const fmtTime = (t, tz) => t ? t.replace(":", ".") + (tz ? " " + tz : "") : "";
+  const flight = (al, no) => [al, no.toUpperCase()].filter(Boolean).join(" ");
+  const count = (n, unit) => n === "" ? "" : `${n} ${unit}`;
+  const waNumber = s => { let d = s.replace(/\D/g, ""); if (d.startsWith("0")) d = "62" + d.slice(1); return d; };
+
+  function build() {
+    const missing = [];
+    const need = (val, label) => { if (!val) { missing.push(label); return MISS; } return val; };
+    const opt = val => val || "-";
+    const up = s => s === MISS ? MISS : s.toUpperCase();
+    const useDep = $("useDep").checked, useArr = $("useArr").checked;
+    $("pDep").classList.toggle("off", !useDep);
+    $("pArr").classList.toggle("off", !useArr);
+
+    const L = [];
+    L.push(`Yth. ${v("agentName") || "Bapak/Ibu"},`, "");
+    const legs = useDep && useArr ? "keberangkatan dan kedatangan" : useDep ? "keberangkatan" : useArr ? "kedatangan" : "";
+    L.push(`Dengan hormat, kami mohon bantuan pengaturan layanan antar jemput bandara${legs ? " (" + legs + ")" : ""} untuk klien kami dengan rincian berikut.`, "");
+
+    L.push("DATA PENUMPANG");
+    L.push(`Nama: ${need(v("name"), "Nama yang dijemput")}`);
+    L.push(`No. HP: ${need(v("phone"), "No HP")}`);
+    if (v("email")) L.push(`Email: ${v("email")}`);
+    L.push("");
+
+    let subjDate = "";
+    if (useDep) {
+      const tz = $("depTz").value;
+      L.push(`PENJEMPUTAN KE BANDARA — ${up(need(v("depCity"), "Kota keberangkatan"))}`);
+      L.push(`Tanggal jemput: ${need(fmtDate(v("depDate")), "Tanggal jemput")}`);
+      L.push(`Jam jemput: ${need(fmtTime(v("depPickTime"), tz), "Jam jemput")}`);
+      L.push(`Alamat penjemputan: ${need(v("depAddr"), "Alamat penjemputan (keberangkatan)")}`);
+      L.push(`Penerbangan: ${need(flight(v("depAirline"), v("depFlight")), "Flight number (keberangkatan)")}, berangkat pukul ${need(fmtTime(v("depFlightTime"), tz), "Jam flight")}`);
+      L.push(`Jumlah penumpang: ${opt(count(v("depPax"), "orang"))}`);
+      L.push(`Jumlah bagasi: ${opt(count(v("depBag"), "koli"))}`);
+      L.push("");
+      subjDate = v("depDate");
+    }
+    if (useArr) {
+      const tz = $("arrTz").value;
+      L.push(`PENJEMPUTAN DARI BANDARA — ${up(need(v("arrCity"), "Kota tujuan"))}`);
+      L.push(`Tanggal kedatangan: ${need(fmtDate(v("arrDate")), "Tanggal kedatangan")}`);
+      L.push(`Penerbangan: ${need(flight(v("arrAirline"), v("arrFlight")), "Flight number (kedatangan)")}, tiba pukul ${need(fmtTime(v("arrTime"), tz), "Jam kedatangan")}`);
+      L.push(`Alamat penjemputan: ${need(v("arrPickup"), "Alamat penjemputan (kedatangan)")}`);
+      L.push(`Alamat tujuan: ${need(v("arrDest"), "Alamat tujuan")}`);
+      L.push(`Jumlah penumpang: ${opt(count(v("arrPax"), "orang"))}`);
+      L.push(`Jumlah bagasi: ${opt(count(v("arrBag"), "koli"))}`);
+      L.push("");
+      subjDate = subjDate || v("arrDate");
+    }
+    if (!useDep && !useArr) missing.push("Pilih minimal satu penjemputan");
+    if (v("notes")) L.push(`Catatan: ${v("notes")}`, "");
+
+    L.push("Mohon konfirmasi ketersediaan armada beserta nama dan nomor kontak pengemudi. Terima kasih atas bantuannya.", "");
+    L.push("Hormat kami,");
+    L.push(v("sender") || "[nama pengirim]");
+
+    const route = [useDep && v("depCity"), useArr && v("arrCity")].filter(Boolean).join(" – ");
+    const subj = ["Booking Antar Jemput Bandara", v("name") || null, route || null, subjDate ? fmtDate(subjDate).replace(/^\S+, /, "") : null].filter(Boolean).join(" | ");
+    return { subj, text: L.join("\n"), missing };
+  }
+
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+  let current = { subj: "", text: "" };
+
+  function render() {
+    const r = build(); current = r;
+    $("outSubj").textContent = r.subj;
+    $("outTo").textContent = v("agentEmail") || "—";
+    $("body").innerHTML = esc(r.text).split(esc(MISS)).join(`<mark>${esc(MISS)}</mark>`);
+    const m = $("missing");
+    if (r.missing.length) { m.hidden = false; m.textContent = "Belum diisi: " + r.missing.join(", ") + "."; }
+    else m.hidden = true;
+    const b = $("barBadge"); b.hidden = !r.missing.length; b.textContent = r.missing.length + " kosong";
+    $("btnMail").href = `mailto:${encodeURIComponent(v("agentEmail"))}?subject=${encodeURIComponent(r.subj)}&body=${encodeURIComponent(r.text)}`;
+    const wa = `https://wa.me/${waNumber(v("agentWa"))}?text=${encodeURIComponent("*" + r.subj + "*\n\n" + r.text)}`;
+    $("btnWa").href = wa; $("barWa").href = wa;
+    save();
+  }
+
+  function snapshot() {
+    const o = {}; ids.forEach(id => o[id] = $(id).value); checks.forEach(id => o[id] = $(id).checked); return o;
+  }
+  function apply(o) {
+    ids.forEach(id => { $(id).value = o[id] ?? ($(id).tagName === "SELECT" ? $(id).options[0].value : ""); });
+    checks.forEach(id => { $(id).checked = o[id] !== false; });
+  }
+  let isSample = false;
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ data: snapshot(), isSample })); } catch (e) {} }
+  function setSample(flag) { isSample = flag; $("sampleTag").hidden = !flag; }
+
+  function flash(msg) {
+    const s = $("status"), t = $("toast");
+    s.textContent = msg; s.classList.add("ok"); t.textContent = msg; t.hidden = false;
+    clearTimeout(flash.t); flash.t = setTimeout(() => {
+      s.classList.remove("ok"); s.innerHTML = "Bagian yang <mark>disorot</mark> belum diisi."; t.hidden = true;
+    }, 2200);
+  }
+  function selectBody() {
+    const r = document.createRange(); r.selectNodeContents($("body"));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  }
+  async function copy(text, label) {
+    try { await navigator.clipboard.writeText(text); flash(label + " tersalin."); }
+    catch (e) { selectBody(); flash("Teks sudah dipilih, tekan Salin di menu HP."); }
+  }
+  const fullText = () => "Subjek: " + current.subj + "\n\n" + current.text;
+
+  // Tampilan HP: #email = layar email, tombol Back kembali ke form
+  function setView() {
+    const mail = location.hash === "#email";
+    document.body.dataset.view = mail ? "mail" : "form";
+  }
+  function openMail() { location.hash = "email"; window.scrollTo(0, 0); }
+  function closeMail() { if (location.hash === "#email") history.back(); else setView(); }
+  window.addEventListener("hashchange", () => { setView(); window.scrollTo(0, 0); });
+
+  $("f").addEventListener("input", () => { if (isSample) setSample(false); render(); });
+  $("f").addEventListener("change", render);
+  $("f").addEventListener("submit", e => e.preventDefault());
+  $("btnCopyAll").addEventListener("click", () => copy(fullText(), "Email"));
+  $("btnCopySubj").addEventListener("click", () => copy(current.subj, "Subjek"));
+  $("barCopy").addEventListener("click", () => copy(fullText(), "Email"));
+  $("barView").addEventListener("click", openMail);
+  $("barBack").addEventListener("click", closeMail);
+  $("btnBackTop").addEventListener("click", closeMail);
+  $("barShare").addEventListener("click", async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: current.subj, text: fullText() }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    copy(fullText(), "Email");
+  });
+  $("btnSample").addEventListener("click", () => { apply(SAMPLE); setSample(true); render(); });
+  $("btnClear").addEventListener("click", () => { apply({ depTz: "WIB", arrTz: "WIB" }); setSample(false); render(); $("name").focus(); });
+  $("btnCopy").addEventListener("click", () => {
+    $("arrAirline").value = $("depAirline").value; $("arrFlight").value = $("depFlight").value;
+    $("arrPax").value = $("depPax").value; $("arrBag").value = $("depBag").value;
+    if (!$("arrDate").value) $("arrDate").value = $("depDate").value;
+    render(); flash("Data penerbangan disalin dari keberangkatan.");
+  });
+
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (saved && saved.data) { apply(saved.data); setSample(!!saved.isSample); }
+  else { apply(SAMPLE); setSample(true); }
+  setView();
+  render();
+})();
+</script>
+<!--/B-->
+<script>
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+</script>
+</body>
+</html>
